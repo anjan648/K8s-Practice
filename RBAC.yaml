@@ -1,0 +1,154 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: dev-role
+  namespace: development
+rules:
+- apiGroups: ["", "extensions", "apps"] # "" indicates the core API group
+  resources: ["pods", "services", "deployments", "replicasets"]
+  verbs: ["get", "update", "list", "create", "delete"]
+
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: prod-role
+  namespace: production
+rules:
+- apiGroups: ["", "extensions", "apps"] # "" indicates the core API group
+  resources: ["pods", "services", "deployments", "replicasets"]
+  verbs: ["get", "update", "list", "create", "delete"]  
+
+
+##Creating 
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: anand-RoleBinding
+  namespace: development
+subjects:
+- kind: User
+  name: anand
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: dev-role  # Ensure this matches your Role name
+  apiGroup: rbac.authorization.k8s.io
+
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: bala-RoleBinding
+  namespace: production
+subjects:
+- kind: User
+  name: bala
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: prod-role  # Correct role reference here
+  apiGroup: rbac.authorization.k8s.io
+
+
+
+#=================================================
+#creating ClusterRole and ClusterROle binding to provide access to the users at cluster level so that user can have accesss to all namespaces
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cluster-wide-role-1
+rules:
+- apiGroups: ["", "extensions", "apps"] # "" indicates the core API group
+  resources: ["pods", "services", "deployments", "replicasets"]
+  verbs: ["get", "update", "list", "create", "delete"]
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ClusterRoleBinding-Anand
+subjects:
+- kind: User
+  name: anand
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-wide-role-1
+  apiGroup: rbac.authorization.k8s.io
+
+#========================================================
+#We can assign cluseterrole at namespace level by using rolebinding instead of using clusterrolebinding
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cluster-wide-role-1
+rules:
+- apiGroups: ["", "extensions", "apps"] # "" indicates the core API group
+  resources: ["pods", "services", "deployments", "replicasets"]
+  verbs: ["get", "update", "list", "create", "delete"]
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: anand-development
+  namespace: development
+subjects:
+- kind: User
+  name: anand
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-wide-role-1
+  apiGroup: rbac.authorization.k8s.io
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: anand-production
+  namespace: production
+subjects:
+- kind: User
+  name: anand
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-wide-role-1
+  apiGroup: rbac.authorization.k8s.io
+
+
+# =======CLUSTER-ADMIN--ROLE-to-bala===================
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: new-cluster-admin-role
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
+  
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ClusterRole-bala
+subjects:
+- kind: User
+  name: bala
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: new-cluster-admin-role
+  apiGroup: rbac.authorization.k8s.io
+
+
+
+

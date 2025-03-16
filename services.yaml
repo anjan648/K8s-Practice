@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: controller
+          image: sreeharshav/ubuntu16:ansible2.75_V2
+          ports:
+            - containerPort: 80
+
+            
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web1
+  labels:
+    app: web1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web1
+  template:
+    metadata:
+      labels:
+        app: web1
+    spec:
+      containers:
+        - name: web1
+          image: sreeharshav/ubuntu16:withssh2.0_V2
+          ports:
+            - containerPort: 80
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web2
+  labels:
+    app: web2
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web2
+  template:
+    metadata:
+      labels:
+        app: web2
+    spec:
+      containers:
+        - name: web2
+          image: sreeharshav/ubuntu16:withssh2.0_V2
+          ports:
+            - containerPort: 80
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web3
+  labels:
+    app: web3
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web3
+  template:
+    metadata:
+      labels:
+        app: web3
+    spec:
+      containers:
+        - name: web3
+          image: sreeharshav/ubuntu16:withssh2.0_V2
+          ports:
+            - containerPort: 80

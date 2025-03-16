@@ -1,0 +1,116 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  namespace: cert-manager
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: anjanms7706@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - selector:
+        dnsZones:
+          - "anjan07.shop"
+      dns01:
+        route53:
+          region: us-east-1
+          accessKeyID: AKIAXYKJXLHQYH6YVHNN
+          secretAccessKeySecretRef:
+            name: acme-route53
+            key: secret-access-key
+
+
+# 7.	Request for a certificate using the following code.
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: nginx-tls-awscoffee-cert
+  namespace: default
+spec:
+  secretName: nginx-tls-default
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - '*.anjan07.shop'
+  acme:
+    config:
+      - dns01:
+          provider: route53
+        domains:
+          - '*.anjan07.shop'
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: www-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+    - hosts:
+        - www.anjan07.shop
+      secretName: nginx-tls-default
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: www-deployment
+                port:
+                  number: 80
+
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myapp1-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+    - hosts:
+        - myapp1.anjan07.shop
+      secretName: nginx-tls-default
+  rules:
+    - http:
+        paths:
+          - path: /myapp1
+            pathType: Prefix
+            backend:
+              service:
+                name: myapp1-deployment
+                port:
+                  number: 80
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myapp2-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+    - hosts:
+        - myapp2.anjan07.shop
+      secretName: nginx-tls-default
+  rules:
+    - http:
+        paths:
+          - path: /myapp2
+            pathType: Prefix
+            backend:
+              service:
+                name: myapp2-deployment
+                port:
+                  number: 80

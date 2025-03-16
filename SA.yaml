@@ -1,0 +1,47 @@
+#Service Account Creation - ClusterRole Creation - ClusterRoleBinding Creation
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: api-access
+  namespace: default
+ 
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pods-sa-cluster-admin-role
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
+ 
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pods-sa-cluster-admin-role-binding
+subjects:
+- kind: ServiceAccount
+  name: api-access
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: pods-sa-cluster-admin-role
+  apiGroup: rbac.authorization.k8s.io
+    
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: kubectlpod2
+  name: kubectlpod2
+  namespace: default
+spec:
+  serviceAccountName: api-access
+  containers:
+  - image: sreeharshav/kubectlpod:v2
+    name: kubectlpod2
+
+
