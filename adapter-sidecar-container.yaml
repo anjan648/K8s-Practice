@@ -1,0 +1,47 @@
+# Sidecar adapter container:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: nginx01
+  name: nginx01
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      run: nginx01
+  template:
+    metadata:
+      labels:
+        run: nginx01
+    spec:
+      containers:
+        - image: sreeharshav/rollingupdate:v5
+          name: nginx01
+          volumeMounts:
+            - mountPath: /usr/share/nginx/html/
+              name: data
+        - image: sreeharshav/utils
+          name: utils
+          volumeMounts:
+            - mountPath: /data
+              name: data
+          command: ["/bin/bash"]
+          args: ["-c", "for I in {1..30}; do echo \"<h1>Welcome To You for $I Time</h1>\" > /data/index.html; sleep 2; done"]
+      volumes:
+        - name: data
+          emptyDir: {}    
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx01
+spec:
+  selector:
+    run: nginx01
+  ports:
+  - port: 8000
+    targetPort: 80
+  type: NodePort
+
