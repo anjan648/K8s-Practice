@@ -1,0 +1,112 @@
+#Node affinity requiredDuringSchedulingIgnoredDuringExecution:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: required-hard
+  name: required-hard-1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: required-hard
+  template:
+    metadata:
+      labels:
+        run: required-hard
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: env
+                operator: In
+                values:
+                - dev
+                - prod
+      containers:
+      - image: nginx
+        name: required-hard
+      tolerations:
+        - key: "env"
+          operator: "Equal"
+          value: "factory"
+          effect: "NoSchedule"
+
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: required-hard
+  name: required-hard
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: required-hard
+  template:
+    metadata:
+      labels:
+        run: required-hard
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: env
+                operator: In
+                values:
+                - dev
+                - prod
+      containers:
+      - image: nginx
+        name: required-hard
+      tolerations:
+        - key: "env"
+          operator: "Equal"
+          value: "dev"
+          effect: "NoSchedule"
+
+---
+
+#Node affinity preferredDuringSchedulingIgnoredDuringExecution
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: preferred-soft
+  name: preferred-soft
+spec:
+  replicas: 8
+  selector:
+    matchLabels:
+      run: preferred-soft
+  template:
+    metadata:
+      labels:
+        run: preferred-soft
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: env
+                operator: In
+                values:
+                - dev
+      containers:
+      - image: nginx
+        name: deploy01
+      tolerations:
+        - key: "env"
+          operator: "Equal"
+          value: "dev"
+          effect: "NoSchedule"
